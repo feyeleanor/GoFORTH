@@ -22,6 +22,11 @@ func (s *ForthStack) Swap() {
 	stack.Stack(s).Swap(i - 1, i)
 }
 
+func (s *ForthStack) SwapPop() {
+	s.Swap();
+	return s.Pop(), s.Pop();
+}
+
 func (s *ForthStack) Multiply() {
 	s.Push(s.Pop() * s.Pop());
 }
@@ -90,6 +95,12 @@ func (s *ForthStack) And() {
 
 func (s *ForthStack) Or() {
 	s.Push(s.Pop() | s.Pop());
+	s.Push(FALSE);
+	s.NotEqual();
+}
+
+func (s *ForthStack) Xor() {
+	s.Push(s.Pop() ^ s.Pop());
 	s.Push(FALSE);
 	s.NotEqual();
 }

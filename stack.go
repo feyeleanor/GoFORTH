@@ -11,10 +11,18 @@ const(
 	MINIMUM_STACK_SIZE = 8;
 )
 
+const(
+	OK = iota;
+	EMPTY;
+	UNDERFLOW;
+	OVERFLOW;
+)
+
 // Stack is the container itself.
 // The zero value for Stack is an empty stack ready to use.
 type Stack struct {
-	elements container.Container;
+	elements		container.Container;
+	error_status	int;
 }
 
 func New(desired_elements int) *Stack {

@@ -14,172 +14,72 @@ type Primitive struct {
 	memory			[]byte;
 }
 
-var (
+type Interpreter struct {
 	stack			ForthStack;
 	returnStack		ForthStack;
 	memory			vector.IntVector;
 	primitives		map[string] Primitive;
-	words			map[string] string;
+	words			map[string] []byte;
 	variables		map[string] int;
-)
+}
 
-func (p *Primitive) Execute() (result int, error int) {
-	if stack.Len() < parameters { return 0, 1 }
+func (p *Primitive) Execute(runtime Interpreter) (result int, error int) {
+	if stack.Len() < parameters { return 0, stack.UNDERFLOW }
 	switch p.opcode {
-	case 0:		// !
-		value = int(stack.Pop());
-		memory.Set(int(stack.Pop()), value);
-
-	case 1:		// *
-		stack.Multiply();
-
-	case 2:		// +
-		stack.Add();
-
-	case 3:		// -
-		stack.Subtract();
-
-	case 4:		// .
-		stack.Print();
-
-	case 5:		// ."
-		// TODO:
-
-	case 6:		// /
-		stack.Divide();
-
-	case 7:		// /MOD
-		stack.Divmod();
-
-	case 8:		// 0<
-		stack.Push(0);
-		stack.LessThan();
-
-	case 9:		// 0=
-		stack.Push(0);
-		stack.Equal();
-
-	case 9.1:	// 0>
-		stack.Push(0);
-		stack.GreaterThan();
-
-	case 10:	// <
-		stack.LessThan();
-
-	case 11:	// =
-		stack.Equal();
-
-	case 12:	// >
-		stack.GreaterThan();
-
-	case 13:	// ?
-		fmt.Fprintf(os.Stdout, memory.At(stack.Pop()));
-
-	case 14:	// @
-		stack.Push(memory.At(stack.Pop()));
-
-	case 15:	// ABS
-		stack.Abs();
-
-	case 16:	// AND
-		stack.And();
-
-	case 17:	// C@
-		stack.Push(memory.At(stack.Pop()));
-
-	case 18:	// CR
-		fmt.Fprintln(os.Stdout);
-
-	case 19:	// DROP
-		stack.Pop();
-
-	case 20:	// DUP
-		stack.Push(stack.Last());
-
-	case 21:	// EMIT
-		stack.Emit();
-
-	case 22:	// KEY
-		code := [1]byte;
-		os.Stdin.Read(code);
-		stack.Push(code);
-
-	case 23:	// MAX
-		stack.Maximum();
-
-	case 24:	// MIN
-		stack.Minimum();
-
-	case 25:	// MINUS
-		stack.Minus();
-
-	case 26:	// MOD
-		stack.Mod();
-
-	case 27:	// OR
-		stack.Or();
-
-	case 28:	// OVER
-		stack.Over();
-
-	case 29:	// SPACE
-		fmt.Fprintf(os.Stdout, " ");
-
-	case 30:	// SPACES
-		fmt.Fprintf(os.Stdout, strings.Repeat(" ", stack.Pop()));
-
-	case 31:	// SWAP
-		stack.Swap();
-
-	case 32:	// VARIABLE
-		// TODO:
-
-	case 33:	// XOR
-		if (stack.Pop() ^ stack.Pop()) != FALSE { stack.Push(TRUE) }
-		else { stack.Push(FALSE) }
-
-	case 34:	// BEGIN
-		// TODO:
-
-	case 35:	// UNTIL
-		// TODO:
-
-	case 36:	// WHILE
-		// TODO:
-
-	case 37:	// REPEAT
-		// TODO:
-
-	case 38:	// IF
-		// TODO:
-
-	case 39:	// THEN
-		// TODO:
-
-	case 40:	// ELSE
-		// TODO:
-
-	case 41:	// FORTH
-		// TODO:
-
-	case 42:	// CLEAR
-		// TODO:
-
-	case 43:	// ROT
-		stack.Rot();
-
-	case 44:	// DO
-		// TODO:
-
-	case 45:	// LOOP
-		// TODO:
-
-	case 46:	// I
-		// TODO:
-
-	case 47:	// BYE
-		os.Exit(0);
-
+	case 0:			runtime.memory.Set(runtime.stack.SwapPop());						// !
+	case 1:			runtime.stack.Multiply();											// *
+	case 2:			runtime.stack.Add();												// +
+	case 3:			runtime.stack.Subtract();											// -
+	case 4:			runtime.stack.Print();												// .
+	case 5:			// TODO																// ."
+	case 6:			runtime.stack.Divide();												// /
+	case 7:			runtime.stack.Divmod();												// /MOD
+	case 8:			runtime.stack.Push(0);												// 0<
+					runtime.stack.LessThan();
+	case 9:			runtime.stack.Push(0);												// 0=
+					runtime.stack.Equal();
+	case 10:		runtime.stack.Push(0);												// 0>
+					runtime.stack.GreaterThan();
+	case 11:		runtime.stack.LessThan();											// <
+	case 12:		runtime.stack.Equal();												// =
+	case 13:		runtime.stack.GreaterThan();										// >
+	case 14:		fmt.Fprintf(os.Stdout, runtime.memory.At(runtime.stack.Pop()));		// ?
+	case 15:		runtime.stack.Push(runtime.memory.At(runtime.stack.Pop()));			// @
+	case 16:		runtime.stack.Abs();												// ABS
+	case 17:		runtime.stack.And();												// AND
+	case 18:		runtime.stack.Push(runtime.memory.At(runtime.stack.Pop()));			// C@
+	case 19:		fmt.Fprintln(os.Stdout);											// CR
+	case 20:		runtime.stack.Pop();												// DROP
+	case 21:		runtime.stack.Push(runtime.stack.Last());							// DUP
+	case 22:		runtime.stack.Emit();												// EMIT
+	case 23:		code := [1]byte;													// KEY
+					os.Stdin.Read(code);
+					runtime.stack.Push(code);
+	case 24:		runtime.stack.Maximum();											// MAX
+	case 25:		runtime.stack.Minimum();											// MIN
+	case 26:		runtime.stack.Minus();												// MINUS
+	case 27:		runtime.stack.Mod();												// MOD
+	case 28:		runtime.stack.Or();													// OR
+	case 29:		runtime.stack.Over();												// OVER
+	case 30:		fmt.Fprintf(os.Stdout, " ");										// SPACE
+	case 31:		fmt.Fprintf(os.Stdout, strings.Repeat(" ", runtime.stack.Pop()));	// SPACES
+	case 32:		runtime.stack.Swap();												// SWAP
+	case 33:		// TODO																// VARIABLE
+	case 34:		runtime.stack.Xor();												// XOR
+	case 35:		// TODO																// BEGIN
+	case 36:		// TODO																// UNTIL
+	case 37:		// TODO																// WHILE
+	case 38:		// TODO																// REPEAT
+	case 39:		// TODO																// IF
+	case 40:		// TODO																// THEN
+	case 41:		// TODO																// ELSE
+	case 42:		// TODO																// FORTH
+	case 43:		// TODO																// CLEAR
+	case 44:		runtime.stack.Rot();												// ROT
+	case 45:		// TODO																// DO
+	case 46:		// TODO																// LOOP
+	case 47:		// TODO																// I
+	case 48:		os.Exit(0);															// BYE
 	default:
   }
 }
