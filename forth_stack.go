@@ -1,7 +1,7 @@
 package goforth
 
 import (
-  "container/vector";
+  "stack";
   "fmt";
   "os";
 )
@@ -11,88 +11,107 @@ const (
 	FALSE = 0;
 )
 
-type forthStack vector.IntVector;
+type ForthStack stack.Stack;
 
-func (s *forthStack)multiply() {
+func NewStack() ForthStack {
+	return stack.New(64);
+}
+
+func (s *ForthStack) Swap() {
+	i := s.TopIndex();
+	stack.Stack(s).Swap(i - 1, i)
+}
+
+func (s *ForthStack) Multiply() {
 	s.Push(s.Pop() * s.Pop());
 }
 
-func (s *forthStack)add() {
+func (s *ForthStack) Add() {
 	s.Push(s.Pop() + s.Pop());
 }
 
-func (s *forthStack)subtract() {
-	x = s.Pop();
-	s.Push(s.Pop() - x);
+func (s *ForthStack) Subtract() {
+	s.Swap();
+	s.Push(s.Pop() - s.Pop());
 }
 
-func (s *forthStack)print() {
+func (s *ForthStack) Print() {
 	fmt.Fprintf(os.Stdout, s.Pop());
 }
 
-func (s *forthStack)emit() {
+func (s *ForthStack) Emit() {
 	fmt.Fprintf(os.Stdout, byte(s.Pop()));
 }
 
-func (s *forthStack)divide() {
-	divisor := s.Pop();
-	s.Push(s.Pop() / divisor);
+func (s *ForthStack) Divide() {
+	s.Swap();
+	s.Push(s.Pop() / s.Pop());
 }
 
-func (s* forthStack)mod() {
-	denominator := stack.Pop();
-	stack.Push(stack.Pop() % denominator);
+func (s* ForthStack) Mod() {
+	s.Swap();
+	stack.Push(stack.Pop() % stack.Pop());
 }
 
-func (s *forthStack)divmod() {
-  	denominator = s.Pop();
+func (s *ForthStack) Divmod() {
+  	denominator := s.Pop();
   	numerator := s.Pop();
-		s.Push(numerator % denominator);
+	s.Push(numerator % denominator);
   	s.Push(numerator / denominator);
 }
 
-func (s *forthStack)less_than() {
-	condition := s.Pop();
-	if s.Pop() < condition { s.Push(TRUE) }
+func (s *ForthStack) LessThan() {
+	s.Swap();
+	if s.Pop() < s.Pop() { s.Push(TRUE) }
 	else { s.Push(FALSE) }
 }
 
-func (s *forthStack)equal_to() {
-		if s.Pop() == s.Pop() { s.Push(TRUE) }
-		else { s.Push(FALSE) }
-}
-
-func (s *forthStack)not_equal_to() {
-		if s.Pop() != s.Pop() { s.Push(TRUE) }
-		else { s.Push(FALSE) }
-}
-
-func (s *forthStack)greater_than() {
-	condition := s.Pop();
-	if s.Pop() > condition { s.Push(TRUE) }
+func (s *ForthStack) Equal() {
+	if s.Pop() == s.Pop() { s.Push(TRUE) }
 	else { s.Push(FALSE) }
 }
 
-func (s *forthStack)and() {
+func (s *ForthStack) NotEqual() {
+	if s.Pop() != s.Pop() { s.Push(TRUE) }
+	else { s.Push(FALSE) }
+}
+
+func (s *ForthStack) GreaterThan() {
+	s.Swap();
+	if s.Pop() > s.Pop() { s.Push(TRUE) }
+	else { s.Push(FALSE) }
+}
+
+func (s *ForthStack) And() {
 	s.Push(s.Pop() & s.Pop());
 	s.Push(FALSE);
-	s.not_equal_to();
+	s.NotEqual();
 }
 
-func (s *forthStack)or() {
+func (s *ForthStack) Or() {
 	s.Push(s.Pop() | s.Pop());
 	s.Push(FALSE);
-	s.not_equal_to();
+	s.NotEqual();
 }
 
-func (s *forthStack)abs() {
+func (s *ForthStack) Abs() {
 	value := s.Pop();
 	if value < 0 { value = -value }
 	s.Push(value);
 }
 
-func (s *forthStack)over() {
-	x, y := stack.Pop(), stack.Last();
-	stack.Push(x);
-	stack.Push(y);
+func (s *ForthStack) Minus() {
+	s.At(s.Topndex(), -s.Top())
+}
+
+func (s *ForthStack) Minimum() {
+	x, y := s.Pop(), s.Pop();
+	if x < y { stack.Push(x) }
+	else { stack.Push(y) }
+}
+
+func (s *ForthStack) Maximum() {
+	x, y := s.Pop(), s.Pop();
+	if x > y { stack.Push(x) }
+	else { stack.Push(y) }
 }

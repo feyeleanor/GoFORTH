@@ -1,76 +1,76 @@
 package goforth
 
 import (
-  "container/vector";
-  "fmt";
-  "os";
-  "strings";
+	"container/vector"
+	"fmt";
+	"os";
+	"strings";
 )
 
 type Primitive struct {
-  parameters	int;
-  results			int;
-  opcode			int;
-  memory			[]byte;
+	parameters		int;
+	results			int;
+	opcode			int;
+	memory			[]byte;
 }
 
 var (
-  stack				forthStack;
-  returnStack	forthStack;
-  memory			vector.IntVector;
-  primitives	map[string] Primitive;
-  words				map[string] string;
-  variables		map[string] int;
+	stack			ForthStack;
+	returnStack		ForthStack;
+	memory			vector.IntVector;
+	primitives		map[string] Primitive;
+	words			map[string] string;
+	variables		map[string] int;
 )
 
-func Primitive.execute() (result int, error int) {
+func (p *Primitive) Execute() (result int, error int) {
 	if stack.Len() < parameters { return 0, 1 }
-  switch primitive.opcode {
-  case 0:		// !
-  	value = int(stack.Pop());
+	switch p.opcode {
+	case 0:		// !
+		value = int(stack.Pop());
 		memory.Set(int(stack.Pop()), value);
 
-  case 1:		// *
-		stack.multiply();
+	case 1:		// *
+		stack.Multiply();
 
-  case 2:		// +
-		stack.add();
+	case 2:		// +
+		stack.Add();
 
-  case 3:		// -
-		stack.subtract();
+	case 3:		// -
+		stack.Subtract();
 
-  case 4:		// .
-  	stack.print();
+	case 4:		// .
+		stack.Print();
 
-  case 5:		// ."
-  	// TODO:
+	case 5:		// ."
+		// TODO:
 
-  case 6:		// /
-  	stack.divide();
+	case 6:		// /
+		stack.Divide();
 
-  case 7:		// /MOD
-  	stack.divmod();
+	case 7:		// /MOD
+		stack.Divmod();
 
-  case 8:		// 0<
-  	stack.Push(0);
-  	stack.less_than();
+	case 8:		// 0<
+		stack.Push(0);
+		stack.LessThan();
 
-  case 9:		// 0=
-  	stack.Push(0);
-  	stack.equal_to();
+	case 9:		// 0=
+		stack.Push(0);
+		stack.Equal();
 
 	case 9.1:	// 0>
 		stack.Push(0);
-		stack.greater_than();
+		stack.GreaterThan();
 
-  case 10:	// <
-  	stack.less_than();
+	case 10:	// <
+		stack.LessThan();
 
-  case 11:	// =
-  	stack.equal_to();
+	case 11:	// =
+		stack.Equal();
 
-  case 12:	// >
-  	stack.greater_than();
+	case 12:	// >
+		stack.GreaterThan();
 
 	case 13:	// ?
 		fmt.Fprintf(os.Stdout, memory.At(stack.Pop()));
@@ -79,10 +79,10 @@ func Primitive.execute() (result int, error int) {
 		stack.Push(memory.At(stack.Pop()));
 
 	case 15:	// ABS
-		stack.abs();
+		stack.Abs();
 
 	case 16:	// AND
-		stack.and();
+		stack.And();
 
 	case 17:	// C@
 		stack.Push(memory.At(stack.Pop()));
@@ -97,7 +97,7 @@ func Primitive.execute() (result int, error int) {
 		stack.Push(stack.Last());
 
 	case 21:	// EMIT
-		stack.emit();
+		stack.Emit();
 
 	case 22:	// KEY
 		code := [1]byte;
@@ -105,26 +105,22 @@ func Primitive.execute() (result int, error int) {
 		stack.Push(code);
 
 	case 23:	// MAX
-		x, y := stack.Pop(), stack.Pop();
-		if x > y { stack.Push(x) }
-		else { stack.Push(y) }
+		stack.Maximum();
 
 	case 24:	// MIN
-		x, y := stack.Pop(), stack.Pop();
-		if x < y { stack.Push(x) }
-		else { stack.Push(y) }
+		stack.Minimum();
 
 	case 25:	// MINUS
-		stack.Push(-stack.Pop());
+		stack.Minus();
 
 	case 26:	// MOD
-		stack.mod();
+		stack.Mod();
 
 	case 27:	// OR
-		stack.or();
+		stack.Or();
 
 	case 28:	// OVER
-		stack.over();
+		stack.Over();
 
 	case 29:	// SPACE
 		fmt.Fprintf(os.Stdout, " ");
@@ -133,7 +129,7 @@ func Primitive.execute() (result int, error int) {
 		fmt.Fprintf(os.Stdout, strings.Repeat(" ", stack.Pop()));
 
 	case 31:	// SWAP
-		stack.Swap(stack.Len() - 1, stack.Len() - 2);
+		stack.Swap();
 
 	case 32:	// VARIABLE
 		// TODO:
@@ -170,8 +166,7 @@ func Primitive.execute() (result int, error int) {
 		// TODO:
 
 	case 43:	// ROT
-		top_of_stack := stack.Len() - 1;
-		stack.Push(stack.At(top_of_stack - 1));
+		stack.Rot();
 
 	case 44:	// DO
 		// TODO:
@@ -190,12 +185,12 @@ func Primitive.execute() (result int, error int) {
 }
 
 func init() {
-	stack = new(vector.IntVector);
-	returnStack = new(vector.IntVector);
-  memory = new(vector.IntVector);
-  words = make(map[string] string);
-  variables = make(map[string] int);
-  primitives = make(map[string] Primitive);
+	stack = NewStack();
+	returnStack = NewStack();
+	memory = new(vector.IntVector);
+	words = make(map[string] string);
+	variables = make(map[string] int);
+	primitives = make(map[string] Primitive);
 	primitives["!"] = Primitive{2, 0, 0};
 	primitives["*"] = Primitive{2, 1, 1};
 	primitives["+"] = Primitive{2, 1, 2};
@@ -206,42 +201,43 @@ func init() {
 	primitives["/MOD"] = Primitive{2, 2, 7};
 	primitives["0<"] = Primitive{1, 1, 8};
 	primitives["0="] = Primitive{1, 0, 9};
-	primitives["<"] = Primitive{2, 1, 10};
-	primitives["="] = Primitive{2, 1, 11};
-	primitives[">"] = Primitive{2, 1, 12};
-	primitives["?"] = Primitive{1, 0, 13};
-	primitives["@"] = Primitive{1, 1, 14};
-	primitives["ABS"] = Primitive{1, 1, 15};
-	primitives["AND"] = Primitive{2, 1, 16};
-	primitives["C@"] = Primitive{1, 1, 17};
-	primitives["CR"] = Primitive{0, 0, 18};
-	primitives["DROP"] = Primitive{1, 0, 19};
-	primitives["DUP"] = Primitive{1, 2, 20};
-	primitives["EMIT"] = Primitive{1, 0, 21};
-	primitives["KEY"] = Primitive{0, 1, 22};
-	primitives["MAX"] = Primitive{2, 1, 23};
-	primitives["MIN"] = Primitive{2, 1, 24};
-	primitives["MINUS"] = Primitive{1, 1, 25};
-	primitives["MOD"] = Primitive{2, 1, 26};
-	primitives["OR"] = Primitive{2, 1, 27};
-	primitives["OVER"] = Primitive{2, 3, 28};
-	primitives["SPACE"] = Primitive{0, 0, 29};
-	primitives["SPACES"] = Primitive{1, 2, 30};
-	primitives["SWAP"] = Primitive{2, 2, 31};
-	primitives["VARIABLE"] = Primitive{1, 0, 32};
-	primitives["XOR"] = Primitive{2, 1, 33};
-	primitives["BEGIN"] = Primitive{0, 0, 34};
-	primitives["UNTIL"] = Primitive{1, 0, 35};
-	primitives["WHILE"] = Primitive{1, 0, 36};
-	primitives["REPEAT"] = Primitive{0, 0, 37};
-	primitives["IF"] = Primitive{1, 0, 38};
-	primitives["THEN"] = Primitive{0, 0, 39};
-	primitives["ELSE"] = Primitive{0, 0, 40};
-	primitives["FORTH"] = Primitive{0, 0, 41};
-	primitives["CLEAR"] = Primitive{0, 0, 42};
-	primitives["ROT"] = Primitive{3, 3, 43};
-	primitives["DO"] = Primitive{2, 0, 44};
-	primitives["LOOP"] = Primitive{0, 0, 45};
-	primitives["I"] = Primitive{0, 1, 46};
-	primitives["BYE"] = Primitive{0, 0, 47};
+	primitives["0>"] = Primitive{1, 0, 10};
+	primitives["<"] = Primitive{2, 1, 11};
+	primitives["="] = Primitive{2, 1, 12};
+	primitives[">"] = Primitive{2, 1, 13};
+	primitives["?"] = Primitive{1, 0, 14};
+	primitives["@"] = Primitive{1, 1, 15};
+	primitives["ABS"] = Primitive{1, 1, 16};
+	primitives["AND"] = Primitive{2, 1, 17};
+	primitives["C@"] = Primitive{1, 1, 18};
+	primitives["CR"] = Primitive{0, 0, 19};
+	primitives["DROP"] = Primitive{1, 0, 20};
+	primitives["DUP"] = Primitive{1, 2, 21};
+	primitives["EMIT"] = Primitive{1, 0, 22};
+	primitives["KEY"] = Primitive{0, 1, 23};
+	primitives["MAX"] = Primitive{2, 1, 24};
+	primitives["MIN"] = Primitive{2, 1, 25};
+	primitives["MINUS"] = Primitive{1, 1, 26};
+	primitives["MOD"] = Primitive{2, 1, 27};
+	primitives["OR"] = Primitive{2, 1, 28};
+	primitives["OVER"] = Primitive{2, 3, 29};
+	primitives["SPACE"] = Primitive{0, 0, 30};
+	primitives["SPACES"] = Primitive{1, 2, 31};
+	primitives["SWAP"] = Primitive{2, 2, 32};
+	primitives["VARIABLE"] = Primitive{1, 0, 33};
+	primitives["XOR"] = Primitive{2, 1, 34};
+	primitives["BEGIN"] = Primitive{0, 0, 35};
+	primitives["UNTIL"] = Primitive{1, 0, 36};
+	primitives["WHILE"] = Primitive{1, 0, 37};
+	primitives["REPEAT"] = Primitive{0, 0, 38};
+	primitives["IF"] = Primitive{1, 0, 39};
+	primitives["THEN"] = Primitive{0, 0, 40};
+	primitives["ELSE"] = Primitive{0, 0, 41};
+	primitives["FORTH"] = Primitive{0, 0, 42};
+	primitives["CLEAR"] = Primitive{0, 0, 43};
+	primitives["ROT"] = Primitive{3, 3, 44};
+	primitives["DO"] = Primitive{2, 0, 45};
+	primitives["LOOP"] = Primitive{0, 0, 46};
+	primitives["I"] = Primitive{0, 1, 47};
+	primitives["BYE"] = Primitive{0, 0, 48};
 }
