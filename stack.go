@@ -31,6 +31,25 @@ func New(desired_elements int) *Stack {
 	return Stack{elements: container.New(allocation_length, 0)};
 }
 
+func (s *Stack) ClearErrors() {
+	s.error_status = OK;
+}
+
+func (s *Stack) IsValid() bool {
+	if error_status == OK { return true }
+	else { return false }
+}
+
+func (s *Stack) HasDepth(minimum_size int) bool {
+	if !s.IsValid() { return false }
+	if s.Len() >= minimum_size {
+		return true
+	} else {
+		s.error_status = UNDERFLOW;
+		return false;
+	}
+}
+
 func (s *Stack) Cap() int {
 	return s.elements.Cap();
 }
@@ -40,11 +59,18 @@ func (s *Stack) Len() int {
 }
 
 func (s *Stack) At(position uint) Value {
-	return s.elements[position];
+	if s.HasDepth(position) { return s.elements[position] }
+	s.error_status = OVERFLOW;
+	return false;
 }
 
-func (s *Stack) Set(position uint, x Value) {
-	s.elements[position] = x;
+func (s *Stack) Set(position uint, x Value) bool {
+	if s.HasDepth(position) {
+		s.elements[position] = x;
+		return true;
+	}
+	s.error_status = OVERFLOW;
+	return false;
 }
 
 func (s *Stack) Top() Value {
@@ -93,10 +119,15 @@ func (s *Stack) Push(x Value) {
 
 func (s *Stack) Pop() Value {
 	i := s.Len() - 1;
-	x := s.elements[i];
-	s.elements[i] = nil;
-	s.elements = s.elements[0:i];
-	return x;
+	if i < 1 {
+		s.error_status = EMPTY;
+		return nil;
+	} else {
+		x := s.elements[i];
+		s.elements[i] = nil;
+		s.elements = s.elements[0:i];
+		return x;
+	}
 }
 
 func (s *Stack) AppendStack(x *Stack) {

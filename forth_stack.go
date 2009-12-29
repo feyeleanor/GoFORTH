@@ -17,18 +17,19 @@ func NewStack() ForthStack {
 	return stack.New(64);
 }
 
-func (s *ForthStack) Swap() {
-	i := s.TopIndex();
-	stack.Stack(s).Swap(i - 1, i)
-}
-
-func (s *ForthStack) SwapPop() {
-	s.Swap();
-	return s.Pop(), s.Pop();
+func (s *ForthStack) Swap() bool {
+	if s.HasDepth(2) {
+		i := s.TopIndex();
+		stack.Stack(s).Swap(i - 1, i);
+		return true;
+	}
+	return false;
 }
 
 func (s *ForthStack) Multiply() {
-	s.Push(s.Pop() * s.Pop());
+	if s.HasDepth(2) {
+		s.Push(s.Pop() * s.Pop());
+	}
 }
 
 func (s *ForthStack) Add() {
