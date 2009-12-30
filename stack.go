@@ -61,7 +61,13 @@ func (s *Stack) Len() int {
 func (s *Stack) At(position uint) Value {
 	if s.HasDepth(position) { return s.elements[position] }
 	s.error_status = OVERFLOW;
-	return false;
+	return nil;
+}
+
+func (s *Stack) Pick(position uint) Value {
+	if s.HasDepth(position) { return s.elements[s.TopIndex() - position] }
+	s.error_status = OVERFLOW;
+	return nil;
 }
 
 func (s *Stack) Set(position uint, x Value) bool {
@@ -79,6 +85,10 @@ func (s *Stack) Top() Value {
 
 func (s *Stack) TopIndex() int {
 	return s.Len() - 1;
+}
+
+func (s *Stack) SetTop(x Value) {
+	s.Set(s.TopIndex(), x);
 }
 
 func (s *Stack) Insert(position uint, x Value) {
@@ -127,6 +137,15 @@ func (s *Stack) Pop() Value {
 		s.elements[i] = nil;
 		s.elements = s.elements[0:i];
 		return x;
+	}
+}
+
+func (s *Stack) Drop(elements uint) bool {
+	if s.HasDepth(elements) {
+		s.Delete(s.Len() - elements);
+	} else {
+		s.error_status = UNDERFLOW;
+		return false;
 	}
 }
 

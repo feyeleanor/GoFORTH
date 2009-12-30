@@ -14,10 +14,20 @@ type Primitive struct {
 	memory			[]byte;
 }
 
+type Program struct {
+	memory			vector.IntVector;
+	instructions	[]byte;
+	PC				uint;
+}
+
+func (p *Program) Goto(position uint) {
+	p.PC = position;
+}
+
 type Interpreter struct {
+	Program;
 	stack			ForthStack;
 	returnStack		ForthStack;
-	memory			vector.IntVector;
 	primitives		map[string] Primitive;
 	words			map[string] []byte;
 	variables		map[string] int;
@@ -26,109 +36,180 @@ type Interpreter struct {
 func (p *Primitive) Execute(I Interpreter) bool {
 	if stack.Len() < parameters { return 0, stack.UNDERFLOW }
 	switch p.opcode {
-	case 0:			if I.stack.Swap() { I.memory.Set(I.stack.Pop(), I.stack.Pop()); }		// !
+	// !
+	case 0:			if I.stack.Swap() { I.memory.Set(I.stack.Pop(), I.stack.Pop()); }
 					else { goto ExecutionError }
 
-	case 1:			I.stack.Multiply();											// *
+	// *
+	case 1:			I.stack.Multiply();
 
-	case 2:			I.stack.Add();												// +
+	// +
+	case 2:			I.stack.Add();
 
-	case 3:			I.stack.Subtract();											// -
+	// -
+	case 3:			I.stack.Subtract();
 
-	case 4:			I.stack.Print();												// .
+	// .
+	case 4:			I.stack.Print();
 
-	case 5:			// TODO																// ."
+	// ."
+	case 5:			// TODO
 
-	case 6:			I.stack.Divide();												// /
+	// /
+	case 6:			I.stack.Divide();
 
-	case 7:			I.stack.Divmod();												// /MOD
+	// /MOD
+	case 7:			I.stack.Divmod();
 
-	case 8:			I.stack.Push(0);												// 0<
+	// 0<
+	case 8:			I.stack.Push(0);
 					I.stack.LessThan();
 
-	case 9:			I.stack.Push(0);												// 0=
+	// 0=
+	case 9:			I.stack.Push(0);
 					I.stack.Equal();
 
-	case 10:		I.stack.Push(0);												// 0>
+	// 0>
+	case 10:		I.stack.Push(0);
 					I.stack.GreaterThan();
 
-	case 11:		I.stack.LessThan();											// <
+	// <
+	case 11:		I.stack.LessThan();
 
-	case 12:		I.stack.Equal();												// =
+	// =
+	case 12:		I.stack.Equal();
 
-	case 13:		I.stack.GreaterThan();										// >
+	// >
+	case 13:		I.stack.GreaterThan();
 
-	case 14:		fmt.Fprintf(os.Stdout, I.memory.At(I.stack.Pop()));		// ?
+	// ?
+	case 14:		fmt.Fprintf(os.Stdout, I.memory.At(I.stack.Pop()));
 
-	case 15:		I.stack.Push(I.memory.At(I.stack.Pop()));			// @
+	// @
+	case 15:		I.stack.Push(I.memory.At(I.stack.Pop()));
 
-	case 16:		I.stack.Abs();												// ABS
+	// ABS
+	case 16:		I.stack.Abs();
 
-	case 17:		I.stack.And();												// AND
+	// AND
+	case 17:		I.stack.And();
 
-	case 18:		I.stack.Push(I.memory.At(I.stack.Pop()));			// C@
+	// C@
+	case 18:		I.stack.Push(I.memory.At(I.stack.Pop()));
 
-	case 19:		fmt.Fprintln(os.Stdout);											// CR
+	// CR
+	case 19:		fmt.Fprintln(os.Stdout);
 
-	case 20:		I.stack.Pop();												// DROP
+	// DROP
+	case 20:		I.stack.Pop();
 
-	case 21:		I.stack.Push(I.stack.Last());							// DUP
+	// DUP
+	case 21:		I.stack.Push(I.stack.Last());
 
-	case 22:		I.stack.Emit();												// EMIT
+	// EMIT
+	case 22:		I.stack.Emit();
 
-	case 23:		code := [1]byte;													// KEY
+	// KEY
+	case 23:		code := [1]byte;
 					os.Stdin.Read(code);
 					I.stack.Push(code);
 
-	case 24:		I.stack.Maximum();											// MAX
+	// MAX
+	case 24:		I.stack.Maximum();
 
-	case 25:		I.stack.Minimum();											// MIN
+	// MIN
+	case 25:		I.stack.Minimum();
 
-	case 26:		I.stack.Minus();												// MINUS
+	// MINUS
+	case 26:		I.stack.Minus();
 
-	case 27:		I.stack.Mod();												// MOD
+	// MOD
+	case 27:		I.stack.Mod();
 
-	case 28:		I.stack.Or();													// OR
+	// OR
+	case 28:		I.stack.Or();
 
-	case 29:		I.stack.Over();												// OVER
+	// OVER
+	case 29:		I.stack.Over();
 
-	case 30:		fmt.Fprintf(os.Stdout, " ");										// SPACE
+	// SPACE
+	case 30:		fmt.Fprintf(os.Stdout, " ");
 
-	case 31:		fmt.Fprintf(os.Stdout, strings.Repeat(" ", I.stack.Pop()));	// SPACES
+	// SPACES
+	case 31:		fmt.Fprintf(os.Stdout, strings.Repeat(" ", I.stack.Pop()));
 
-	case 32:		I.stack.Swap();												// SWAP
+	// SWAP
+	case 32:		I.stack.Swap();
 
-	case 33:		// TODO																// VARIABLE
+	// VARIABLE
+	case 33:		// TODO
 
-	case 34:		I.stack.Xor();												// XOR
+	// XOR
+	case 34:		I.stack.Xor();
 
-	case 35:		// TODO																// BEGIN
+	// BEGIN
+	case 35:		I.returnStack.Push(I.programCounter);
 
-	case 36:		// TODO																// UNTIL
+	// UNTIL
+	case 36:		if I.stack.IsFalse() { I.Goto(returnStack.Pop()) }
 
-	case 37:		// TODO																// WHILE
+	// WHILE
+	case 37:		if I.stack.IsFalse() { I.returnStack.Push(stack.TRUE) }
+					else { I.returnStack.Push(stack.FALSE) }
 
-	case 38:		// TODO																// REPEAT
+	// REPEAT
+	case 38:		if I.returnStack.IsFalse() { I.Goto(I.returnStack.Pop()) }
+					else { I.returnStack.Pop() }
 
-	case 39:		// TODO																// IF
+	// IF
+	case 39:		// TODO
+					// Skip to ELSE if condition false
+					if I.stack.IsFalse() { I.Goto(ADDRESS_OF_ELSE_STATEMENT) }
 
-	case 40:		// TODO																// THEN
+	// THEN
+	case 40:		// TODO
+					// Clean up return Stack
 
-	case 41:		// TODO																// ELSE
+	// ELSE
+	case 41:		// TODO
+					// Skip to THEN
 
-	case 42:		// TODO																// FORTH
+	// FORTH
+	case 42:		// TODO
 
-	case 43:		// TODO																// CLEAR
+	// CLEAR
+	case 43:		// TODO
 
-	case 44:		I.stack.Rot();												// ROT
+	// ROT
+	case 44:		I.stack.Rot();
 
-	case 45:		// TODO																// DO
+	// DO
+	case 45:		I.returnStack.Push(I.PC);
+					I.stack.Swap();
+					I.returnStack.Push(I.stack.Pop());
+					I.returnStack.Push(I.stack.Pop());
 
-	case 46:		// TODO																// LOOP
+	// LOOP
+	case 46:		I.returnStack.Push(1);
+					I.returnStack.Add();
+					index := I.returnStack.Top();
+					I.returnStack.LessThan();
+					if I.returnStack.IsTrue() { I.Goto(I.returnStack.Pick(2)) }
+					else { I.returnStack.Drop() }
 
-	case 47:		// TODO																// I
+	// +LOOP
+	case 47:		I.returnStack.Push(I.stack.Pop());
+					I.returnStack.Add();
+					index := I.returnStack.Top();
+					I.returnStack.LessThan();
+					if I.returnStack.IsTrue() { I.Goto(I.returnStack.Pick(2)) }
+					else { I.returnStack.Drop() }
 
-	case 48:		os.Exit(0);															// BYE
+	// I
+	case 48:		I.stack.Push(I.returnStack.Top());
+
+	// BYE
+	case 49:		os.Exit(0);
 
 	default:
 	}
@@ -192,6 +273,8 @@ func init() {
 	primitives["ROT"] = Primitive{3, 3, 44};
 	primitives["DO"] = Primitive{2, 0, 45};
 	primitives["LOOP"] = Primitive{0, 0, 46};
-	primitives["I"] = Primitive{0, 1, 47};
-	primitives["BYE"] = Primitive{0, 0, 48};
+	primitives["+LOOP"] = Primitive{0, 0, 47};
+	primitives["I"] = Primitive{0, 1, 48};
+	primitives["R@"] = Primitive{0, 1, 48};
+	primitives["BYE"] = Primitive{0, 0, 49};
 }

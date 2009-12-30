@@ -127,3 +127,19 @@ func (s *ForthStack) Maximum() {
 	if x > y { stack.Push(x) }
 	else { stack.Push(y) }
 }
+
+func (s *ForthStack) PushTrue() {
+	s.Push(TRUE);
+}
+
+func (s *ForthStack) PushFalse() {
+	s.Push(FALSE);
+}
+
+func (s *ForthStack) IsTrue() {
+	s.Pop() == TRUE;
+}
+
+func (s *ForthStack) IsFalse() {
+	s.Pop() == FALSE;
+}
