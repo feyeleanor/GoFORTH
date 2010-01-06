@@ -1,1 +1,39 @@
-A primitive FORTH implementation in Go.
+== About FORTH ==
+The FORTH language was devised by Charles Moore in the early 1970s for use in embedded applications such as
+the real-time control of radio telescopes.
+
+FORTH is generally considered a Threaded Interpretive Language, meaning that a FORTH program consists of a
+thread of execution comprising references to words in the dictionary intermingled with values to be stored
+on the data stack.
+
+It is a simple language with an iterative development style which favours rapid interactive development
+through specification and composition of words. These words differ from functions or procedures in other
+programming languages by not accepting explicit parameters, instead data is passed implicitly using a
+data stack and the convention of the language is to place values on this stack in LIFO fashion, favouring
+a Reverse Polish mathematical style.
+
+A FORTH runtime can operate in two distinct modes: interactive and turn-key.
+
+An interactive Read-Evaluate-Print loop similar to those found in classic Lisp implementations allows for
+iterative development with compilation of individual words storing the resulting executable code in a token
+indexed dictionary. Words can then be interactively tested and their definitions modified until correct.
+
+Depending on the richness of the dictionary supplied with the implementation there may also be advanced
+code editors and other development tools to aid with this process.
+
+To create a turnkey executable the dictionary can be stripped of unreferenced tokens and then compiled
+to a platform-specific binary executable for distribution which contains only the program.
+
+== About GoFORTH ==
+GoFORTH is a primitive FORTH implementation in Google Go inspired by a FORTH implementation in QuickBasic
+which was itself derived from a FORTH implementation in Locomotive BASIC for the AMSTRAD CPC series of
+home microcomputers. The latter implementation was published in the magazine Computing With The Amstrad
+in 1995 and authored by [INSERT AUTHORSHIP HERE].
+
+Initially the vocabulary is being modelled after Fig-Forth and Forth-79/83 with the possibility of moving
+to an ANS-compatible vocabulary as the project matures.
+
+== Installation ==
+GoFORTH does not yet compile. If you wish to download the source code, type the following into your shell:
+
+	git clone http://github.com/feyeleanor/GoFORTH/GoFORTH.git
