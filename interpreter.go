@@ -1,7 +1,8 @@
 package goforth
 
 import (
-	"container/vector"
+	"golightly";
+	"container/vector";
 	"fmt";
 	"os";
 	"bufio";
@@ -12,23 +13,13 @@ const(
 	BANNER = "GoFORTH v0.0a";
 )
 
-type Program struct {
-	memory			vector.IntVector;
-	instructions	[]byte;
-	PC				uint;
-}
-
-func (p *Program) Goto(position uint) {
-	p.PC = position;
-}
-
 const(
 	INTERPRETING = iota;
 	COMPILING;
 )
 
 type Interpreter struct {
-	Program;
+	golightly.VM;
 	stack			ForthStack;
 	returnStack		ForthStack;
 	primitives		map[string] Primitive {

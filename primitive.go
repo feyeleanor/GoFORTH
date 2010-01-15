@@ -185,6 +185,9 @@ func (p *Primitive) Execute(I Interpreter) bool {
 	// BYE
 	case 49:		os.Exit(0);
 
+	// :...;
+	case 50:
+
 	default:
 	}
 	return true;
