@@ -28,7 +28,7 @@ to a platform-specific binary executable for distribution which contains only th
 GoFORTH is a primitive FORTH implementation in Google Go inspired by a FORTH implementation in QuickBasic
 which was itself derived from a FORTH implementation in Locomotive BASIC for the AMSTRAD CPC series of
 home microcomputers. The latter implementation was published in the magazine Computing With The Amstrad
-in 1995 and authored by [INSERT AUTHORSHIP HERE].
+in 1986 and authored by Stephen Devine.
 
 Initially the vocabulary is being modelled after Fig-Forth and Forth-79/83 with the possibility of moving
 to an ANS-compatible vocabulary as the project matures.
