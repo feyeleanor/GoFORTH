@@ -1,9 +1,14 @@
 package golightly
 
-type MemoryBlock []int
 type Operands struct {
-	a, b, c, d		int;
+	a, b, c		int;
+	d			*interface{};
 }
+
+type MemoryBlock []int
+
+func (block *RegisterBlock) Len() int { return Len(block) }
+func (block *RegisterBlock) Cap() int { return Cap(block) }
 
 func (block *MemoryBlock) Operation(action uint, operands Operands) {
 	switch action {
@@ -25,14 +30,4 @@ func (block *MemoryBlock) Operation(action uint, operands Operands) {
 	case COPY_VALUE:			block[operands.a] = operands.b
 	default:
 	}
-}
-
-func (block *MemoryBlock) Copy(source, target uint) {
-	block_size := Len(MemoryBlock);
-	if source < block_size && target < block_size { block[target] = block[source] }
-}
-
-func (block *MemoryBlock) Add(source, target uint) {
-	block_size := Len(MemoryBlock);
-	if source < block_size && target < block_size { block[target] += block[source] }
 }

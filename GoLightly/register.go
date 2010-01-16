@@ -10,6 +10,9 @@ import (
 
 type RegisterBlock [32]int
 
+
+
+
 func (block *RegisterBlock) Load(register uint, value int) {
 	if register < Len(block) { block[register] = value }
 }
