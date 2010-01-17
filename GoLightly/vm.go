@@ -18,15 +18,18 @@ type Instruction func(o OpCode)
 type RegisterBlock struct {
 	PC				int;					//	program counter
 	SP				int;					//	stack pointer
-	MP				*[]byte;				//	memory pointer
+	MP				*[]int;				//	memory pointer
 	RV				[REGISTER_COUNT]int;	//	16 general purpose registers
 }
-func (block *RegisterBlock) CSELECT(v int) { block.MP = &[]byte(v) }
+func (block *RegisterBlock) CSELECT(v int) { block.MP = &[]int(v) }
 func (block *RegisterBlock) SELECT(r int) { block.CSELECT(block.RV[r]) }
 
 func (block *RegisterBlock) CLD(r, v int) { block.RV[r] = v }
 func (block *RegisterBlock) LD(r1, r2 int) { block.CLD(r1, block.RV[r2]) }
 func (block *RegisterBlock) ILD(r1, r2 int) { block.CLD(r1, block.RV[block.MP[r2]]) }
+
+func (block *RegisterBlock) STORE(r1, r2) { block.MP[block.RV[r2]] = block.RV[r1] }
+func (block *RegisterBlock) XSTORE() { for i := range block.RV { block.MP[i] = block.RV[i] } }
 
 func (block *RegisterBlock) CADD(r, v int) { block.RV[r] += v }
 func (block *RegisterBlock) ADD(r1, r2 int) { block.ADDC(r1, block.RV[r2]) }
@@ -73,6 +76,8 @@ func NewVM(register_count uint) *VM {
 		func (o OpCode) { vm.registers.LD(o.a, o.b) },								//	LD		r1, r2
 		func (o OpCode) { vm.registers.CLD(o.a, o.b) },								//	CLD		r, v
 		func (o OpCode) { vm.registers.ILD(o.a, o.b) },								//	ILD		r1, r2
+		func (o OpCode) { vm.registers.STORE(o.a, o.b) },							//	STORE	r1, r2
+		func (o OpCode) { vm.registers.XSTORE() },									//	XSTORE
 		func (o OpCode) { vm.registers.ADD(o.a, o.b) },								//	ADD		r1, r2
 		func (o OpCode) { vm.registers.CADD(o.a, o.b) },							//	CADD	r, v
 		func (o OpCode) { vm.registers.SUB(o.a, o.b) },								//	SUB		r1, r2
